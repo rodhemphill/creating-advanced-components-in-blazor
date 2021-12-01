@@ -1,0 +1,221 @@
+﻿
+@page "/Demo"
+@page "/"
+
+@inherits PersistenceFramework.Views.BasePage
+@using BitcoinDayTrader.Models
+@using BitcoinDayTrader.Models.Enums
+@using BitcoinDayTrader.Models.Enumerations
+
+<MadPageHeader>
+    <MadTitleBar Title="@("Market Data " + MarketData?.DisplayName)"></MadTitleBar>
+
+    <MadToolbar>
+        <LeftItems>
+            <MadBreadCrumb Style="margin-top:-20px" IconStyle="margin: 0 var(--margin-large) 0 var(--margin-large)"></MadBreadCrumb>
+        </LeftItems>
+    </MadToolbar>
+</MadPageHeader>
+
+<MadPageLayout ToolbarAboveCount="1" ToolbarBelowCount="0">
+    <MadTabGroup>
+        <ToolbarItems>
+            @*<AuthorizeView Roles=@Roles.AdminAndDataMaint>*@
+                <MadButton OnClick="@ToggleEdit" Text="@(FieldsDisabled ? "Edit" : "Disable")"></MadButton>
+            @*</AuthorizeView>*@
+        </ToolbarItems>
+        <ChildContent>
+            <MadTab Label="View">
+                @if (DataLoaded)
+                {
+                    <MadSaveAlert IsVisible="@SavedAlertVisible" IsSuccess="@SaveSuccess"></MadSaveAlert>
+
+                    <MadPageLayout Style="margin-top:unset">
+                        <MadColumn>
+
+
+                            <MadPanel>
+                                <MadTextFieldDemo1 
+                                    Disabled="@FieldsDisabled" 
+                                    @bind-Value="@DemoField1" 
+                                    Label="First input field"
+                                    OnFocus="@Field1Focus"
+                                    OnFocusOut="@Field1FocusOut"
+                                    OnInput="@Field1OnInput"
+                                    />
+
+
+                                <MadTextFieldDemo1 Disabled="@FieldsDisabled" @bind-Value="@DemoField2" Label="Second input field"/>
+                                <MadTextFieldDemo1 Disabled="@FieldsDisabled" @bind-Value="@DemoField3" Label="Third input field"/>
+                                <MadTextFieldDemo1 Disabled="@FieldsDisabled" @bind-Value="@DemoField4" Label="Another input field"/>
+
+                                <MadTextFieldDemo1 
+                                    Disabled="@FieldsDisabled" 
+                                    @bind-Value="@MarketData.EcomomicUpdate" 
+                                    Label="Ecomomic Update"
+                                    OnFocusOut="@(() => MarketData.IsValidAsync(nameof(MarketData.EcomomicUpdate)))"
+                                    ValidationMessage="@MarketData.GetErrors(nameof(MarketData.EcomomicUpdate))"
+                                    />
+
+
+                               <MadTextFieldDemo1 
+                                    Disabled="@FieldsDisabled" 
+                                    @bind-Value="@MarketData.CreditUpdate" 
+                                    Label="@nameof(MarketData.CreditUpdate).Label()"
+                                    OnFocusOut="@(() => MarketData.IsValidAsync(nameof(MarketData.CreditUpdate)))"
+                                    ValidationMessage="@MarketData.GetErrors(nameof(MarketData.CreditUpdate))"
+                                    />
+
+
+                                <MadTextFieldDemo1 Disabled="@FieldsDisabled" Model="@MarketData" PropertyName="@nameof(MarketData.MarketUpdate)"/>
+                            </MadPanel>
+
+
+                            <MadPanel>
+                                <MadNumericField Model="@MarketData" Disabled="@FieldsDisabled" PropertyName="@nameof(MarketData.AUSBBSW12MonthRate)" TValue="double?"></MadNumericField>
+                                <MadNumericField Model="@MarketData" Disabled="@FieldsDisabled" PropertyName="@nameof(MarketData.AUSCash07DayRate)" TValue="double?"></MadNumericField>
+                                <MadNumericField Model="@MarketData" Disabled="@FieldsDisabled" PropertyName="@nameof(MarketData.AUSRBACashRate)" TValue="double?"></MadNumericField>
+                            </MadPanel>
+                            <MadPanel>
+                                <Column1>
+                                    <MadNumericField Model="@MarketData" Disabled="@FieldsDisabled" PropertyName="@nameof(MarketData.AUSBBFWD03MonthRate)" TValue="double?"></MadNumericField>
+                                    <MadNumericField Model="@MarketData" Disabled="@FieldsDisabled" PropertyName="@nameof(MarketData.AUSBBFWD06MonthRate)" TValue="double?"></MadNumericField>
+                                    <MadNumericField Model="@MarketData" Disabled="@FieldsDisabled" PropertyName="@nameof(MarketData.AUSBBFWD09MonthRate)" TValue="double?"></MadNumericField>
+                                    <MadNumericField Model="@MarketData" Disabled="@FieldsDisabled" PropertyName="@nameof(MarketData.AUSBBFWD12MonthRate)" TValue="double?"></MadNumericField>
+                                    <MadNumericField Model="@MarketData" Disabled="@FieldsDisabled" PropertyName="@nameof(MarketData.AUSBBFWD15MonthRate)" TValue="double?"></MadNumericField>
+                                    <MadNumericField Model="@MarketData" Disabled="@FieldsDisabled" PropertyName="@nameof(MarketData.AUSBBFWD18MonthRate)" TValue="double?"></MadNumericField>
+                                </Column1>
+                                <Column2>
+                                    <MadDatePicker Model="@MarketData" Disabled="@FieldsDisabled" PropertyName="@nameof(MarketData.AUSBBFWD03MonthDate)" TValue="DateTime?"></MadDatePicker>
+                                    <MadDatePicker Model="@MarketData" Disabled="@FieldsDisabled" PropertyName="@nameof(MarketData.AUSBBFWD06MonthDate)" TValue="DateTime?"></MadDatePicker>
+                                    <MadDatePicker Model="@MarketData" Disabled="@FieldsDisabled" PropertyName="@nameof(MarketData.AUSBBFWD09MonthDate)" TValue="DateTime?"></MadDatePicker>
+                                    <MadDatePicker Model="@MarketData" Disabled="@FieldsDisabled" PropertyName="@nameof(MarketData.AUSBBFWD12MonthDate)" TValue="DateTime?"></MadDatePicker>
+                                    <MadDatePicker Model="@MarketData" Disabled="@FieldsDisabled" PropertyName="@nameof(MarketData.AUSBBFWD15MonthDate)" TValue="DateTime?"></MadDatePicker>
+                                    <MadDatePicker Model="@MarketData" Disabled="@FieldsDisabled" PropertyName="@nameof(MarketData.AUSBBFWD18MonthDate)" TValue="DateTime?"></MadDatePicker>
+                                </Column2>
+                            </MadPanel>
+                            <MadPanel>
+                                <MadNumericField Model="@MarketData" Disabled="@FieldsDisabled" PropertyName="@nameof(MarketData.AUSUBSBankBillIndex)" TValue="double?"></MadNumericField>
+                                <MadNumericField Model="@MarketData" Disabled="@FieldsDisabled" PropertyName="@nameof(MarketData.AUSBondComposite000To003Index)" TValue="double?"></MadNumericField>
+                                <MadNumericField Model="@MarketData" Disabled="@FieldsDisabled" PropertyName="@nameof(MarketData.AUSBondComposite000PlusIndex)" TValue="double?"></MadNumericField>
+                                <MadNumericField Model="@MarketData" Disabled="@FieldsDisabled" PropertyName="@nameof(MarketData.AUSBondComposite000To005Index)" TValue="double?"></MadNumericField>
+                                <MadNumericField Model="@MarketData" Disabled="@FieldsDisabled" PropertyName="@nameof(MarketData.AUSBondCreditFRN000PlusIndex)" TValue="double?"></MadNumericField>
+                                <MadNumericField Model="@MarketData" Disabled="@FieldsDisabled" PropertyName="@nameof(MarketData.AUSBondCreditFinancialsIndex)" TValue="double?"></MadNumericField>
+                                <MadNumericField Model="@MarketData" Disabled="@FieldsDisabled" PropertyName="@nameof(MarketData.AUSRBACashRateIndex)" TValue="double?"></MadNumericField>
+                                <MadNumericField Model="@MarketData" Disabled="@FieldsDisabled" PropertyName="@nameof(MarketData.SPASX200Index)" TValue="double?"></MadNumericField>
+                                <MadNumericField Model="@MarketData" Disabled="@FieldsDisabled" PropertyName="@nameof(MarketData.CPIAllGroupsIndex)" TValue="double?"></MadNumericField>
+                                <MadNumericField Model="@MarketData" Disabled="@FieldsDisabled" PropertyName="@nameof(MarketData.SP500Index)" TValue="double?"></MadNumericField>
+                                <MadNumericField Model="@MarketData" Disabled="@FieldsDisabled" PropertyName="@nameof(MarketData.AUDGold)" TValue="double?"></MadNumericField>
+                                <MadNumericField Model="@MarketData" Disabled="@FieldsDisabled" PropertyName="@nameof(MarketData.AUDOil)" TValue="double?"></MadNumericField>
+                                <MadNumericField Model="@MarketData" Disabled="@FieldsDisabled" PropertyName="@nameof(MarketData.ASX90DayBillFutures)" TValue="double?"></MadNumericField>
+                                <MadNumericField Model="@MarketData" Disabled="@FieldsDisabled" PropertyName="@nameof(MarketData.ASX03YearTreasuryBondFutures)" TValue="double?"></MadNumericField>
+                                <MadNumericField Model="@MarketData" Disabled="@FieldsDisabled" PropertyName="@nameof(MarketData.SPASX200NetTotalReturnIndex)" TValue="double?"></MadNumericField>
+                                <MadNumericField Model="@MarketData" Disabled="@FieldsDisabled" PropertyName="@nameof(MarketData.MSCIWorldExAustraliaIndex)" TValue="double?"></MadNumericField>
+                                <MadNumericField Model="@MarketData" Disabled="@FieldsDisabled" PropertyName="@nameof(MarketData.SPASXAustralianFixedInterestIndex)" TValue="double?"></MadNumericField>
+                            </MadPanel>
+                        </MadColumn>
+                        <MadColumn>
+                            <MadPanel>
+                                <div>
+                                    <MadButton Text="Render Counter" OnClick="@ToggleRenderCounter"/>
+                                </div>
+
+                                <MadNumericField Model="@MarketData" Disabled="@FieldsDisabled" PropertyName="@nameof(MarketData.AUSBBSW01MonthRate)" Label="@Label1" OverlineStyle="@Style1" InnerStyle="@InnerStyle1" TValue="double?"/>
+                                <MadNumericField Model="@MarketData" Disabled="@FieldsDisabled" PropertyName="@nameof(MarketData.AUSBBSW02MonthRate)" Label="@Label2" OverlineStyle="@Style2" InnerStyle="@InnerStyle2" TValue="double?"/>
+                                <MadNumericField Model="@MarketData" Disabled="@FieldsDisabled" PropertyName="@nameof(MarketData.AUSBBSW03MonthRate)" Label="@Label3" OverlineStyle="@Style3" InnerStyle="@InnerStyle3" TValue="double?" 
+                                    Style="color: red; transition: transform 1s linear;  transform-origin: top left;  transform-style: preserve-3D;"
+                                    Class="demo-rotate"
+                                    />
+                                <MadNumericField Model="@MarketData" Disabled="@FieldsDisabled" PropertyName="@nameof(MarketData.AUSBBSW04MonthRate)" TValue="double?"></MadNumericField>
+                                <MadNumericField Model="@MarketData" Disabled="@FieldsDisabled" PropertyName="@nameof(MarketData.AUSBBSW05MonthRate)" TValue="double?"></MadNumericField>
+                                <MadNumericField Model="@MarketData" Disabled="@FieldsDisabled" PropertyName="@nameof(MarketData.AUSBBSW06MonthRate)" TValue="double?"></MadNumericField>
+                            </MadPanel>
+                            <MadPanel>
+                                <MadNumericField Model="@MarketData" Disabled="@FieldsDisabled" PropertyName="@nameof(MarketData.AUSSwapRate01YearRate)" TValue="double?"></MadNumericField>
+                                <MadNumericField Model="@MarketData" Disabled="@FieldsDisabled" PropertyName="@nameof(MarketData.AUSSwapRate02YearRate)" TValue="double?"></MadNumericField>
+                                <MadNumericField Model="@MarketData" Disabled="@FieldsDisabled" PropertyName="@nameof(MarketData.AUSSwapRate03YearRate)" TValue="double?"></MadNumericField>
+                                <MadNumericField Model="@MarketData" Disabled="@FieldsDisabled" PropertyName="@nameof(MarketData.AUSSwapRate04YearRate)" TValue="double?"></MadNumericField>
+                                <MadNumericField Model="@MarketData" Disabled="@FieldsDisabled" PropertyName="@nameof(MarketData.AUSSwapRate05YearRate)" TValue="double?"></MadNumericField>
+                                <MadNumericField Model="@MarketData" Disabled="@FieldsDisabled" PropertyName="@nameof(MarketData.AUSSwapRate06YearRate)" TValue="double?"></MadNumericField>
+                                <MadNumericField Model="@MarketData" Disabled="@FieldsDisabled" PropertyName="@nameof(MarketData.AUSSwapRate07YearRate)" TValue="double?"></MadNumericField>
+                                <MadNumericField Model="@MarketData" Disabled="@FieldsDisabled" PropertyName="@nameof(MarketData.AUSSwapRate08YearRate)" TValue="double?"></MadNumericField>
+                                <MadNumericField Model="@MarketData" Disabled="@FieldsDisabled" PropertyName="@nameof(MarketData.AUSSwapRate09YearRate)" TValue="double?"></MadNumericField>
+                                <MadNumericField Model="@MarketData" Disabled="@FieldsDisabled" PropertyName="@nameof(MarketData.AUSSwapRate10YearRate)" TValue="double?"></MadNumericField>
+                                <MadNumericField Model="@MarketData" Disabled="@FieldsDisabled" PropertyName="@nameof(MarketData.AUSSwapRate12YearRate)" TValue="double?"></MadNumericField>
+                                <MadNumericField Model="@MarketData" Disabled="@FieldsDisabled" PropertyName="@nameof(MarketData.AUSSwapRate15YearRate)" TValue="double?"></MadNumericField>
+                                <MadNumericField Model="@MarketData" Disabled="@FieldsDisabled" PropertyName="@nameof(MarketData.AUSSwapRate20YearRate)" TValue="double?"></MadNumericField>
+                                <MadNumericField Model="@MarketData" Disabled="@FieldsDisabled" PropertyName="@nameof(MarketData.AUSSwapRate25YearRate)" TValue="double?"></MadNumericField>
+                                <MadNumericField Model="@MarketData" Disabled="@FieldsDisabled" PropertyName="@nameof(MarketData.AUSSwapRate30YearRate)" TValue="double?"></MadNumericField>
+                            </MadPanel>
+                            <MadPanel>
+                                <MadTextField Model="@MarketData" PropertyName="@nameof(MarketData.InterestRateReview)" TextArea="true" Disabled="@FieldsDisabled"></MadTextField>
+                            </MadPanel>
+                        </MadColumn>
+
+                    </MadPageLayout>
+                    <MadPageFooter>
+
+                        <Toolbar>
+                            <LeftItems>
+
+                            </LeftItems>
+                            <RightItems>
+                                @if (!IsEditable || FieldsDisabled)
+                                {
+                                    <MadButton Text="Back" IsSecondary="true" OnClick="CancelClicked"></MadButton>
+                                }
+                                else
+                                {
+                                    <MadAlternateControls DisplayPrimaryControl="@InputFieldsHaveChanged">
+                                        <PrimaryControl>
+                                            <MadButton Text="Cancel" IsSecondary="true" OnClick="CancelClicked"></MadButton>
+                                        </PrimaryControl>
+                                        <SecondaryControl>
+                                            <MadButton Text="Back" IsSecondary="true" OnClick="CancelClicked"></MadButton>
+                                        </SecondaryControl>
+                                    </MadAlternateControls>
+
+                                    <MadAlternateControls DisplayPrimaryControl="@InputFieldsHaveChanged">
+                                        <PrimaryControl>
+                                            @if (IsNew)
+                                            {
+                                                <MadButton Text="Add Record" OnClick="SaveClicked"></MadButton>
+                                            }
+                                            else
+                                            {
+                                                <MadButton Text="Update" OnClick="SaveClicked"></MadButton>
+                                            }
+                                        </PrimaryControl>
+                                        <SecondaryControl>
+                                            @if (IsNew)
+                                            {
+                                                <MadButton Text="Add Record" Disabled="true" OnClick="SaveClicked"></MadButton>
+                                            }
+                                            else
+                                            {
+                                                <MadButton Text="Update" Disabled="true" OnClick="SaveClicked"></MadButton>
+                                            }
+                                        </SecondaryControl>
+                                    </MadAlternateControls>
+                                }
+                            </RightItems>
+                        </Toolbar>
+                    </MadPageFooter>
+
+                } @* End If DataLoaded *@
+            </MadTab>
+            @*<MadTab Label="Import Data">
+                </MadTab>*@
+            <MadTab Label="System Activity">
+                <ChildContent>
+                    <MadPanel>
+                        <SystemActivityListPanel ModelType="typeof(MarketData)" ModelId="@MarketData.Id" />
+                    </MadPanel>
+                </ChildContent>
+            </MadTab>
+            <MadTab Label="Help">
+
+            </MadTab>
+        </ChildContent>
+    </MadTabGroup>
+</MadPageLayout>

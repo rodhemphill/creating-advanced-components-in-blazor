@@ -1,0 +1,172 @@
+﻿@using BitcoinDayTrader.Models.Enums
+@using BitcoinDayTrader.PersistenceFramework.Helpers
+@using BitcoinDayTrader.PersistenceFramework
+@using System.Diagnostics
+@namespace BitcoinDayTrader.Components.Controls
+@inherits BaseControl
+
+
+<label class="m-field-container @Class" style="@_inlineStyle @Style">
+    @if (!HideLabelsIfBlank || !string.IsNullOrEmpty(Label))
+    {
+        <p class="overline" style="@OverlineStyle">@Label </p>
+    }
+
+    @if (TextArea)
+    {
+        <textarea value="@Value"
+                  class="m-field @_successClass @_errorClass @InnerClass"
+                  style="background-image: url(@(PathHelper.IconPath + IconName)); @(_placeHolderPadding); @(InnerStyle); "
+                  placeholder="@PlaceHolder"
+                  readonly="@Disabled"
+                  @onfocusout="@OnFocusOutInternal"
+                  @onkeypress="@OnKeyPressInternal"
+                  @onfocus="@OnFocusInternal"
+                  @oninput="@(x => OnInputChanged(x))" />
+    }
+    else
+    {
+        <input value="@Value"
+               class="m-field @_successClass @_errorClass @InnerClass"
+               style="background-image: url(@(PathHelper.IconPath + IconName)); @_placeHolderPadding; @(InnerStyle); "
+               placeholder="@PlaceHolder"
+               disabled="@Disabled"
+               @onfocusout="@OnFocusOutInternal"
+               @onkeypress="@OnKeyPressInternal"
+               @onfocus="@OnFocusInternal"
+               @oninput="@(x => OnInputChanged(x))" />
+    }
+
+    @if (!HideErrorsIfBlank || !string.IsNullOrEmpty(ValidationMessage))
+    {
+        <p class="error">@(string.IsNullOrEmpty(ValidationMessage) ? " " : ValidationMessage)</p>
+    }
+</label>
+
+
+@code {
+    private bool placeHolderVisible = true;
+    private string _placeHolderPadding => string.IsNullOrEmpty(IconName) ? "" : "padding-left: 42px";
+    private string dummyPassword = "*******";
+
+    // ---------- PARAMETERS ----------
+
+    [Parameter]    public bool TextArea { get; set; } = false;
+    [Parameter]    public bool ChangeOnEnter { get; set; } = false;
+    [Parameter]    public bool ShowPasswordStarsIfBlank { get; set; }
+    [Parameter]    public string OverlineStyle { get; set; }
+
+    [Parameter]    public EventCallback<string> ValueChanged { get; set; }
+    [Parameter]    public EventCallback OnFocusOut { get; set; }
+    [Parameter]    public EventCallback OnFocus { get; set; }
+    [Parameter]    public EventCallback<ChangeEventArgs> OnInput { get; set; }
+    [Parameter]    public EventCallback<KeyboardEventArgs> OnKeyPress { get; set; }
+    [Parameter]    public EventCallback Validate { get; set; }
+
+    private string _value;
+    [Parameter]    public string Value
+    {
+        get
+        {
+            return _value;
+        }
+        set
+        {
+            if (!Object.Equals(_value, value))
+            {
+                _value = value;
+                ValueChanged.InvokeAsync(_value);
+            }
+        }
+    }
+
+     // ---------- JAVASCRIPT ----------
+    [Inject] private IJSRuntime _js { get; set; }
+    private string Id => "text-field-" + Guid.NewGuid();
+    private DotNetObjectReference<MadTextFieldDemo2> callback;
+
+    private async Task DoSomethingAsync()
+    {
+        await _js.InvokeVoidAsync("doSomething", Id, callback);
+    }
+
+    [JSInvokable]
+    public async Task SomethingDoneAsync(string text)
+    {
+        Console.WriteLine($"Javascript called me back with text '{text}'");
+    }
+
+
+     // ---------- LIFECYCLE METHODS ----------
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        base.OnAfterRenderAsync(firstRender);
+        if (firstRender)
+        {
+            await _js.InvokeVoidAsync("listenForDemoValueChange", Id, callback);
+        }
+    }
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        callback = DotNetObjectReference.Create(this);
+    }
+
+    protected override void OnParametersSet()
+    {
+        if (ShowPasswordStarsIfBlank && string.IsNullOrEmpty(Value))
+            Value = dummyPassword;
+            
+        placeHolderVisible = string.IsNullOrEmpty(Value);
+    }
+
+
+    // ---------- OTHER METHODS ----------
+
+    private async void OnInputChanged(ChangeEventArgs e)
+    {
+        Debug.WriteLine($"OnInputChanged '{e.Value}'");
+        Value = e.Value as string;
+        await OnInput.InvokeAsync(e);
+        return;
+    }
+
+    private async Task OnKeyPressInternal(KeyboardEventArgs args)
+    {
+        Debug.WriteLine($"OnKeyPressInternal '{args.Key}'");
+        if (ChangeOnEnter)
+        {
+            if (args.Key == "Enter")
+            {
+                // we force a blur on the input, which will cause the onchange event to be fired updating the value
+                await _js.InvokeVoidAsync("blurNear", Id);
+            }
+        }
+        await OnKeyPress.InvokeAsync(args);
+        await OnInput.InvokeAsync();
+    }
+
+    private async Task FieldOnInput(ChangeEventArgs e)
+    {
+        Debug.WriteLine($"FieldOnInput '{e.Value}'");
+        placeHolderVisible = string.IsNullOrEmpty(e.Value as string);
+        await OnInput.InvokeAsync(e);
+    }
+
+    protected async Task OnFocusOutInternal()
+    {
+        await OnFocusOut.InvokeAsync(true);
+
+        bool isValid = false;
+        if (isValid && Validate.HasDelegate)
+        {
+            await Validate.InvokeAsync(true);
+        }
+    }    
+    
+    protected async Task OnFocusInternal()
+    {
+        await OnFocus.InvokeAsync(true);
+    }
+}

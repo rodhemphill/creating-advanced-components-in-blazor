@@ -1,0 +1,89 @@
+﻿@using BitcoinDayTrader.Models.Enums
+@using BitcoinDayTrader.PersistenceFramework.Helpers
+@using BitcoinDayTrader.PersistenceFramework
+@using System.Diagnostics
+@namespace BitcoinDayTrader.Components.Controls
+@inherits ComponentBase
+
+
+<label class="m-field-container @Class" style="@Style">
+    <p class="overline">@Label </p>
+    <input value="@Value"
+           class="m-field @_errorClass @InnerClass"
+           style="@InnerStyle; "
+           placeholder="@PlaceHolder"
+           disabled="@Disabled"
+           @onfocusout="@OnFocusOutInternal"
+           @onkeypress="@OnKeyPressInternal"
+           @onfocus="@OnFocusInternal"
+           @oninput="@(x => OnInputChanged(x))" />
+    <p class="error">@(string.IsNullOrEmpty(ValidationMessage) ? " " : ValidationMessage)</p>
+</label>
+
+
+@code {
+    protected string _errorClass => string.IsNullOrEmpty(ValidationMessage) ? "" : "m-field-error";
+
+    // ---------- PARAMETERS ----------
+
+    [Parameter] public EventCallback<string> ValueChanged { get; set; }
+    [Parameter] public EventCallback OnFocusOut { get; set; }
+    [Parameter] public EventCallback OnFocus { get; set; }
+    [Parameter] public EventCallback<ChangeEventArgs> OnInput { get; set; }
+    [Parameter] public EventCallback<KeyboardEventArgs> OnKeyPress { get; set; }
+
+    [Parameter] public string Style { get; set; }
+    [Parameter] public string Class { get; set; }
+    [Parameter] public string InnerStyle { get; set; }
+    [Parameter] public string InnerClass { get; set; }
+    [Parameter] public string PlaceHolder { get; set; }
+    [Parameter] public string Label { get; set; }
+    [Parameter] public bool Disabled { get; set; } = false;
+    [Parameter] public string ValidationMessage { get; set; }
+
+    private string _value;
+    [Parameter] public string Value
+    {
+        get
+        {
+            return _value;
+        }
+        set
+        {
+            if (!Object.Equals(_value, value))
+            {
+                _value = value;
+                ValueChanged.InvokeAsync(_value);
+            }
+        }
+    }
+
+    // ---------- OTHER METHODS ----------
+
+    private async void OnInputChanged(ChangeEventArgs e)
+    {
+        Value = e.Value as string;
+        await OnInput.InvokeAsync(e);
+    }
+
+    private async Task OnKeyPressInternal(KeyboardEventArgs args)
+    {
+        await OnKeyPress.InvokeAsync(args);
+        await OnInput.InvokeAsync();
+    }
+
+    private async Task FieldOnInput(ChangeEventArgs e)
+    {
+        await OnInput.InvokeAsync(e);
+    }
+
+    protected async Task OnFocusOutInternal()
+    {
+        await OnFocusOut.InvokeAsync(true);
+    }
+
+    protected async Task OnFocusInternal()
+    {
+        await OnFocus.InvokeAsync(true);
+    }
+}
